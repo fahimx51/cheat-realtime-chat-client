@@ -1,5 +1,5 @@
 import React from 'react'
-import { Lock, Mail, UserPlus } from "lucide-react";
+import { Lock, Mail, Phone, UserPlus } from "lucide-react";
 
 export default function Register() {
     return (
@@ -35,6 +35,20 @@ export default function Register() {
 
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-widest block">
+                                Phone Number
+                            </label>
+                            <div className="relative group">
+                                <Phone className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
+                                <input
+                                    type="tel"
+                                    placeholder="Phone Number (Optional)"
+                                    className="w-full bg-slate-950 border border-slate-800 p-3.5 pl-12 rounded-2xl text-slate-200 outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-widest block">
                                 Password
                             </label>
                             <div className="relative group">
@@ -53,8 +67,8 @@ export default function Register() {
                         </button>
                     </form>
 
-                    <p className="mt-10 text-center text-slate-400 text-sm font-medium ">Don't have account?{" "}
-                        <a href="#" className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Create an Account</a>
+                    <p className="mt-10 text-center text-slate-400 text-sm font-medium ">Already have an account?{" "}
+                        <a href="#" className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Sign In</a>
                     </p>
 
                 </div>
