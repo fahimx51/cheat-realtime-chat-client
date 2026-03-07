@@ -1,7 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Lock, Mail, Phone, UserPlus } from "lucide-react";
+import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../services/api';
 
 export default function Register() {
+
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        phoneNumber: "",
+    });
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await register(formData);
+            navigate('/login');
+        }
+        catch (error) {
+            alert(error.response?.data?.messege || "Registration Failed");
+        }
+    };
+
     return (
         <div className="flex h-screen items-center justify-center bg-slate-950 px-4">
             <div className="w-full max-w-md bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl border border-slate-800 relative overflow-hidden">
@@ -16,7 +38,24 @@ export default function Register() {
                         <p className="text-slate-400 text-sm mt-2 font-medium">Join our secure messaging platform</p>
                     </div>
 
-                    <form className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-widest block">
+                                Name
+                            </label>
+                            <div className="relative group">
+                                <Mail className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
+                                <input
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    type="text"
+                                    placeholder="Your Name"
+                                    required
+                                    className="w-full bg-slate-950 border border-slate-800 p-3.5 pl-12 rounded-2xl text-slate-200 outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                />
+
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-widest block">
                                 Email
@@ -24,6 +63,7 @@ export default function Register() {
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
                                 <input
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     type="email"
                                     placeholder="example@mail.com"
                                     required
@@ -40,6 +80,7 @@ export default function Register() {
                             <div className="relative group">
                                 <Phone className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
                                 <input
+                                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                                     type="tel"
                                     placeholder="Phone Number (Optional)"
                                     className="w-full bg-slate-950 border border-slate-800 p-3.5 pl-12 rounded-2xl text-slate-200 outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
@@ -54,6 +95,7 @@ export default function Register() {
                             <div className="relative group">
                                 <Lock className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
                                 <input
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     type="password"
                                     placeholder="Password"
                                     required
@@ -68,7 +110,7 @@ export default function Register() {
                     </form>
 
                     <p className="mt-10 text-center text-slate-400 text-sm font-medium ">Already have an account?{" "}
-                        <a href="#" className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Sign In</a>
+                        <Link to='/login' className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Sign In</Link>
                     </p>
 
                 </div>
