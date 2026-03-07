@@ -1,0 +1,14 @@
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+
+function App() {
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30">
+      {/* <Login /> */}
+      <Register />
+    </div>
+  )
+}
+
+export default App
