@@ -1,7 +1,79 @@
 import { ChevronLeft, Download, DownloadIcon, FileText, LogOut, MessageCircle, MoreVerticalIcon, Paperclip, Phone, Search, Send, Settings, Video } from 'lucide-react';
-import React from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { AuthContext } from '../contexts/AuthContext';
+import { SocketContext } from '../contexts/SocketContext';
+import { useNavigate } from 'react-router-dom';
+import { getAllUsers, getConversationMessages } from '../services/api';
 
 export default function Home() {
+
+
+    const { user, logout } = useContext(AuthContext);
+    const { socket, onlineUser } = useContext(SocketContext);
+    const navigate = useNavigate();
+
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = ('');
+    const [loading, setLoading] = useState(false);
+
+    const [searchQuery, setSearchQuery] = useState(false);
+
+    const scrollRef = useRef();
+    const fileInputRef = useRef();
+
+
+    //date helper
+
+    const formatDate = (timestamp) => {
+        if (!timestamp) return "Just Now";
+
+        const date = new Date(timestamp);
+        return isNaN(date.getTime()) ? "Just Now" : date.toDateString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const filteredUsers = useMemo(() => {
+        return users.filter((u) => u.name?.toLowerCase().includes(searchQuery.toLowerCase()),);
+    }, [users, searchQuery]);
+
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await getAllUsers();
+                setUsers(data);
+            }
+            catch (error) {
+                console.log("Users fetch error", error.message);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        const fetchHistory = async () => {
+            if (!selectedUser?._id) return;
+            setLoading(true);
+            try {
+                const data = await getConversationMessages(selectedUser._id);
+                setMessages(data);
+            }
+            catch (error) {
+                console.log("Conversation history error", error.message);
+                setMessages([]);
+            }
+
+            finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, [selectedUser]);
+
+
     return (
         <div className="flex h-screen w-full bg-[#080a0f] text-slate-300 overflow-hidden font-sans antialiased">
             {/* Sidebar */}
