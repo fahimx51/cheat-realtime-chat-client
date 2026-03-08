@@ -1,4 +1,4 @@
-import { Lock, Mail, ShieldCheck } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
@@ -13,21 +13,22 @@ function Login() {
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
-        e.preventDefault();
-        setSubmitting(true);
 
         try {
+            setSubmitting(true);
+
+            e.preventDefault();
+            setSubmitting(true);
             const formData = Object.fromEntries(new FormData(e.currentTarget));
             const response = await loginAPI(formData);
 
             login(response.user, response.token);
-
-            navigate('/');
-
+            navigate('/', { replace: true });
         }
         catch (error) {
             console.error("Login Error Details", error);
             alert(error.messege || "Invalid Email or Password");
+            setSubmitting(false);
         }
     };
 
@@ -80,7 +81,9 @@ function Login() {
                         </div>
 
                         <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black py-4 rounded-2xl transition-all duration-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-                            <span className="text-white">Sign In</span>
+                            {
+                                isSubmitting ? <Loader2 className="animate-spin" /> : <span className="text-white">Sign In</span>
+                            }
                         </button>
 
                     </form>
