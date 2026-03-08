@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext';
 import { SocketContext } from '../contexts/SocketContext';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers, getConversationMessages } from '../services/api';
+import { getAllUsers, getConversationMessages, sendMessege, uploadFile } from '../services/api';
 
 export default function Home() {
 
@@ -17,6 +17,7 @@ export default function Home() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = ('');
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState(false);
 
@@ -72,6 +73,73 @@ export default function Home() {
 
         fetchHistory();
     }, [selectedUser]);
+
+
+    //real time chat
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleMessage = (data) => {
+            const isFormSelected = selectedUser?._id === data.senderId;
+            const isFormMe = data.senderId === (user.id || user._id);
+
+            if (isFormSelected || isFormMe) {
+                setMessages((prev) => [...prev, data]);
+            }
+        };
+
+        socket.on("getMessage", handleMessage);
+
+        return () => socket.off("getMessage", handleMessage);
+    }, [socket, selectedUser, user]);
+
+
+    // Send text message
+    const handleSend = async () => {
+        if (!input.trim() || !selectedUser) return;
+
+        try {
+            const data = await sendMessege({
+                recipientId: selectedUser._id,
+                text: input,
+            });
+
+            socket.emit("sendMessage", {
+                recipientId: selectedUser._id,
+                ...data,
+            });
+
+            setMessages((prev) => [...prev, data]);
+            setInput("");
+        } catch (error) {
+            console.error("send error", error.message);
+        }
+    };
+
+
+    const handleChange = async (e) => {
+        const file = e.target.files[0];
+
+        if (!file || !selectedUser) return;
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("recipientId", selectedUser._id);
+
+        if (input) formData.append("text", input);
+
+        try {
+            const data = await uploadFile(formData);
+            socket.emit('sendMessage', { recipientId: selectedUser._id, ...data });
+        } catch (error) {
+            alert("Upload Failed" + error.message);
+        } finally {
+            setUploading(false);
+            e.target.value = null;
+        }
+    };
 
 
     return (
