@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Lock, Mail, Phone, UserPlus } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../services/api';
+import { registerAPI } from '../services/api';
 
 export default function Register() {
 
@@ -16,7 +16,7 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await register(formData);
+            await registerAPI(formData);
             navigate('/login');
         }
         catch (error) {

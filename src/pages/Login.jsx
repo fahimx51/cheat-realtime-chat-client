@@ -1,7 +1,36 @@
 import { Lock, Mail, ShieldCheck } from "lucide-react";
-import React from "react";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
+import { loginAPI } from "../services/api";
 
 function Login() {
+
+    const { login } = useContext(AuthContext);
+
+    const [isSubmitting, setSubmitting] = useState(false);
+
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+
+        try {
+            const formData = Object.fromEntries(new FormData(e.currentTarget));
+            const response = await loginAPI(formData);
+
+            login(response.user, response.token);
+
+            navigate('/');
+
+        }
+        catch (error) {
+            console.error("Login Error Details", error);
+            alert(error.messege || "Invalid Email or Password");
+        }
+    };
+
     return (
         <div className="flex h-screen items-center justify-center bg-slate-950 px-4">
             <div className="w-full max-w-md bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl border border-slate-800 relative overflow-hidden">
@@ -16,7 +45,7 @@ function Login() {
                         <p className="text-slate-400 text-sm mt-2 font-medium">Enter your details to access your chat</p>
                     </div>
 
-                    <form className="space-y-4">
+                    <form onSubmit={handleLogin} className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-widest block">
                                 Email
@@ -25,6 +54,7 @@ function Login() {
                                 <Mail className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
                                 <input
                                     type="email"
+                                    name="email"
                                     placeholder="example@mail.com"
                                     required
                                     className="w-full bg-slate-950 border border-slate-800 p-3.5 pl-12 rounded-2xl text-slate-200 outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
@@ -41,6 +71,7 @@ function Login() {
                                 <Lock className="absolute left-4 top-4.5 text-slate-500 group-focus-within:text-emerald-500 transition-colors " size={20} />
                                 <input
                                     type="password"
+                                    name="password"
                                     placeholder="Password"
                                     required
                                     className="w-full bg-slate-950 border border-slate-800 p-3.5 pl-12 rounded-2xl text-slate-200 outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
@@ -48,13 +79,14 @@ function Login() {
                             </div>
                         </div>
 
-                        <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black py-4 rounded-2xl transition-all duration-300 shadow-xs flex items-center justify-center gap-2">
+                        <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black py-4 rounded-2xl transition-all duration-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer">
                             <span className="text-white">Sign In</span>
                         </button>
+
                     </form>
 
                     <p className="mt-10 text-center text-slate-400 text-sm font-medium ">Don't have account?{" "}
-                        <a href="#" className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Create an Account</a>
+                        <Link to="/register" className="text-emerald-500 font-bold hover:text-emerald-400 transition-all underline-offset-4  hover:underline">Create an Account</Link>
                     </p>
 
                 </div>

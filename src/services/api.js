@@ -10,7 +10,12 @@ const api = axios.create({
 
 //authEndpoints
 
-export const register = async (userData) => {
+export const registerAPI = async (userData) => {
     const resposnse = await api.post("/auth/register", userData);
+    return resposnse.data;
+};
+
+export const loginAPI = async (userData) => {
+    const resposnse = await api.post("/auth/login", userData);
     return resposnse.data;
 };
