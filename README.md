@@ -29,15 +29,3 @@
 * JWT (Authentication)
 
 ---
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-* Node.js installed on your machine (I recommend using NVM on Linux Mint).
-* A MongoDB Atlas Cluster.
-
-### 2. Installation
-Clone the repository:
-```bash
-git clone [https://github.com/your-username/cheat-realtime-chat-client.git](https://github.com/your-username/cheat-realtime-chat-client.git)
-cd cheat-realtime-chat-client
