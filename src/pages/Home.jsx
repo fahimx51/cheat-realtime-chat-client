@@ -19,7 +19,7 @@ export default function Home() {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
 
-    const [searchQuery, setSearchQuery] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const scrollRef = useRef();
     const fileInputRef = useRef();
@@ -35,6 +35,7 @@ export default function Home() {
     }
 
     const filteredUsers = useMemo(() => {
+        if (!user) return [];
         return users.filter((u) => u.name?.toLowerCase().includes(searchQuery.toLowerCase()),);
     }, [users, searchQuery]);
 
@@ -43,7 +44,13 @@ export default function Home() {
         const fetchUsers = async () => {
             try {
                 const data = await getAllUsers();
-                setUsers(data);
+                console.log("data", data.user);
+
+                if (Array.isArray(data)) {
+                    setUsers(data?.user);
+                } else if (data && Array.isArray(data.users)) {
+                    setUsers(data?.user);
+                } else setUsers([]);
             }
             catch (error) {
                 console.log("Users fetch error", error.message);
@@ -52,6 +59,7 @@ export default function Home() {
 
         fetchUsers();
     }, []);
+
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -145,14 +153,14 @@ export default function Home() {
     return (
         <div className="flex h-screen w-full bg-[#080a0f] text-slate-300 overflow-hidden font-sans antialiased">
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 z-50 w-full md:relative md:w-80 lg:w-96 bg-[#0c0f16] border-r border-white/5 flex flex-col transition-transform duration-500 ease-in-out`}>
+            <aside className={`fixed inset-y-0 z-50 w-full md:relative md:w-80 lg:w-96 bg-[#0c0f16] border-r border-white/5 flex flex-col transition-transform duration-500 ease-in-out ${selectedUser ? "-translate-x-full md:traslate-x-0" : "translate-x-0"}`}>
 
                 {/* Profile Header */}
                 <div className="p-6 flex items-center justify-between border-b border-white/5 bg-[#0e121a]">
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <img
-                                src=""
+                                src={user?.profilePic}
                                 alt=""
                                 className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500/30"
                             />
@@ -160,16 +168,20 @@ export default function Home() {
                         </div>
 
                         <div className='flex flex-col'>
-                            <span className='font-bold text-white text-sm truncate w-24'>User Name</span>
+                            <span className='font-bold text-white text-sm truncate w-24'>{user?.name || "User"}</span>
                             <span className='text-[12px] text-slate-500 font-medium'>My Account</span>
                         </div>
                     </div>
 
                     <div className='flex gap-2'>
-                        <button className='p-2.5 hover:bg-white/5 rounded-full transition-all text-slate-400'>
+                        <button className='p-2.5 hover:bg-white/5 rounded-full transition-all text-slate-400 hover:cursor-pointer'
+                            onClick={() => navigate('/profile')}
+                        >
                             <Settings size={18} />
                         </button>
-                        <button className='p-2.5 hover:bg-white/5 rounded-full transition-all text-slate-400'>
+                        <button className='p-2.5 hover:bg-white/5 rounded-full transition-all text-slate-400 hover:cursor-pointer'
+                            onClick={logout}
+                        >
                             <LogOut size={18} />
                         </button>
                     </div>
@@ -182,6 +194,8 @@ export default function Home() {
                     <div className='relative flex items-center bg-[#141923] rounded-xl px-4 py-2.5 group border border-white/5 focus-within:border-emerald-300/30 transition-all'>
                         <Search size={16} className='text-slate-500 group-focus-within:text-emerald-500 transition-all' />
                         <input type="text" placeholder='Search contracts...'
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className='bg-transparent text-sm ml-3 outline-none w-full text-slate-200 placeholder:text-slate-600'
                         />
                     </div>
@@ -195,30 +209,36 @@ export default function Home() {
                     </p>
 
                     {/* I will use Map Method */}
-                    <div className={`group p-2 rounded-2xl cursor-pointer flex items-center gap-4 transition-all duration-300`}>
-                        {/* Individual contact or group item */}
+                    {filteredUsers.map((u) =>
+                        <div className={`group p-2 rounded-2xl cursor-pointer flex items-center gap-4 transition-all duration-300 ${selectedUser?._id === u.id ? "bg-emerald-600" : "hover:bg-white/5"}`}>
+                            {/* Individual contact or group item */}
 
-                        <div className='relative'>
-                            <img src="" alt="" className={`w-12 h-12 rounded-2xl object-cover transition-all duration-300`} />
+                            <div className='relative'>
+                                <img src={u.profilePic}
+                                    alt=""
+                                    className={`w-12 h-12 rounded-2xl object-cover transition-all duration-300`}
 
-                            {/* Coditional Rendering  */}
-                            <div className='absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-4 border-[#0c0f16] rounded-full'> </div>
-                        </div>
+                                />
 
-
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-center mb-0.5">
-                                <p className={`text-sm font-bold truncate`}>User Name</p>
-                                <span className="text-[12px] text-slate-500 truncate font-medium">12:45</span>
+                                {/* Coditional Rendering  */}
+                                {onlineUser?.includes(u._id) && <div className='absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-4 border-[#0c0f16] rounded-full'> </div>}
                             </div>
 
-                            <p className='text-[11px] text-slate-500 truncate font-medium '>
-                                {/* Conditional Rendering  */}
-                                Active Now
-                            </p>
-                        </div>
 
-                    </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-center mb-0.5">
+                                    <p className={`text-sm font-bold truncate ${selectedUser?._id === u._id ? "text-emerald-400" : "text-slate-200"}`}>{u.name}</p>
+                                    <span className="text-[12px] text-slate-500 truncate font-medium">12:45</span>
+                                </div>
+
+                                <p className='text-[11px] text-slate-500 truncate font-medium '>
+                                    {/* Conditional Rendering  */}
+                                    {onlineUser?.includes(u._id) ? "Active Now" : "Offline"}
+                                </p>
+                            </div>
+
+                        </div>
+                    )}
                 </div>
             </aside>
 
@@ -226,7 +246,8 @@ export default function Home() {
 
             <main className="flex-1 flex flex-col relative bg-[#080a0f]">
                 {/* Conditional Rendering */}
-                <>
+
+                {selectedUser ? <>
                     <header className="px-6 py-4 bg-[#080a0f]/60 backdrop-blur-2xl border-b border-white/5 flex justify-between items-center z-40">
                         <div className="flex items-center gap-4">
                             <button>
@@ -333,18 +354,21 @@ export default function Home() {
                         </div>
                     </div>
                 </>
+                    :
 
-                {/* Else Statement */}
-                <div className='flex-1 flex flex-col items-center justify-center text-center p-8 bg-[radial-gradient(circle_at_top_right, #10141d_0%, #080a0f_100% )] '>
-                    <div className='w-20 h-20 bg-emerald-500/5 rounded-full flex items-center justify-center mb-6 border border-emerald-500/10 animate-pulse'>
-                        <MessageCircle size={32} className='text-emerald-500/50' />
+                    <div className='flex-1 flex flex-col items-center justify-center text-center p-8 bg-[radial-gradient(circle_at_top_right, #10141d_0%, #080a0f_100% )] '>
+                        <div className='w-20 h-20 bg-emerald-500/5 rounded-full flex items-center justify-center mb-6 border border-emerald-500/10 animate-pulse'>
+                            <MessageCircle size={32} className='text-emerald-500/50' />
+                        </div>
+
+                        <h3 className='text-2xl font-bold text-white mb-2 tracking-tight '>Ghost Messenger</h3>
+                        <p className='text-slate-500 text-xs max-w-[200px] font-medium leading-relaxed'>
+                            Select a teammate to start secure encrypted session.
+                        </p>
                     </div>
+                }
 
-                    <h3 className='text-2xl font-bold text-white mb-2 tracking-tight '>Ghost Messenger</h3>
-                    <p className='text-slate-500 text-xs max-w-[200px] font-medium leading-relaxed'>
-                        Select a teammate to start secure encrypted session.
-                    </p>
-                </div>
+
             </main>
 
             <style>{

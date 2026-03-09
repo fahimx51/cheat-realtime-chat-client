@@ -47,7 +47,7 @@ export const updateProfile = async (updateData) => {
 };
 
 export const getAllUsers = async () => {
-    const resposnse = await api.put("/user");
+    const resposnse = await api.get("/user/");
     return resposnse.data;
 };
 
