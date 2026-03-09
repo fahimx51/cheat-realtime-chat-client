@@ -126,7 +126,7 @@ export default function Home() {
     };
 
 
-    const handleChange = async (e) => {
+    const handleFileChange = async (e) => {
         const file = e.target.files[0];
 
         if (!file || !selectedUser) return;
@@ -250,13 +250,18 @@ export default function Home() {
                 {selectedUser ? <>
                     <header className="px-6 py-4 bg-[#080a0f]/60 backdrop-blur-2xl border-b border-white/5 flex justify-between items-center z-40">
                         <div className="flex items-center gap-4">
-                            <button>
+                            <button
+                                onClick={() => setSelectedUser(null)}
+                                className='md:hidden p-2 text-slate-400'
+                            >
                                 <ChevronLeft />
                             </button>
-                            <img src="" alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/20" />
+                            <img src={selectedUser.profilePic} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/20" />
                             <div>
-                                <h2 className="font-bold text-white leading-tight">Name</h2>
-                                <span className='text-[12px] font-bold text-slate-500 tracking-tighter '>Online</span>
+                                <h2 className="font-bold text-white leading-tight">{selectedUser.name}</h2>
+                                <span className='text-[12px] font-bold text-slate-500 tracking-tighter '>
+                                    {onlineUser?.includes(selectedUser._id) ? "Online" : "Offline"}
+                                </span>
                             </div>
                         </div>
 
@@ -279,65 +284,96 @@ export default function Home() {
                     {/* Messege  */}
 
                     <div className='flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[radial-gradient(circle_at_top_right, #10141d_0%, #080a0f_45% )] '>
-                        {/* Conditional Rendering */}
 
-                        <div className='h-full flex flex-col items-center justify-center space-y-4 '>
-                            <div className='w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin'></div>
-                            <span className='text-[10px] text-slate-500 uppercase font-black tracking-widest '>Encrypted Sync</span>
-                        </div>
-
-                        {/* ELSE Conditional Based */}
-
-                        <div className={`flex `}>
-                            <div className={`max-w-[75%] md:max-w-[60%] flex flex-col `}>
-                                <div className={`relative px-4 py-3 shadow-2xl`}>
-                                    {/* Conditonal Rendering */}
-                                    <div className='mb-2 relative group overflow-hidden rounded-xl'>
-
-                                        <img src="" alt="" className='max-w-fit rounded-xl cursor-zoom-in hover:scale-105 transition-all' />
-
-                                        <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center'>
-                                            <Download />
-                                        </div>
-                                    </div>
-
-                                    {/* Else state */}
-
-                                    <div className='flex items-center gap-3 p-3 bg-black/20 rounded-xl mb-2 border border-white/5 group '>
-                                        <div className='p-2 bg-emerald-500/10 text-emerald-400 rounded-lg'>
-                                            <FileText size={20} />
-                                        </div>
-                                        <div className='flex-1 min-w-0 '>
-                                            <p className='text-xs font-bold truncate'>
-                                                Documents
-                                            </p>
-                                        </div>
-
-                                        <a href="#" className='p-1.5 text-slate-400 hover:text-white transition-all '>
-                                            <DownloadIcon size={16} />
-                                        </a>
-                                    </div>
-
-                                    {/* Conditional Rendering */}
-
-                                    <p className='text-[13px] leading-relaxed font-medium '>Text</p>
-
-                                    {/* Date  */}
-
-                                    <div className={`mt-1.5 text-[9px] font-bold `}>
-                                        Date
-                                    </div>
-                                </div>
+                        {
+                            loading ? <div className='h-full flex flex-col items-center justify-center space-y-4 '>
+                                <div className='w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin'></div>
+                                <span className='text-[10px] text-slate-500 uppercase font-black tracking-widest '>Encrypted Sync</span>
                             </div>
-                        </div>
+                                :
+
+
+                                messages.map((m, i) => {
+
+                                    const isMe = (m.senderId || m.sender) === (user._id || user.id);
+                                    const isImage = m.fileUrl && m.fileType?.startsWith("image");
+                                    const isDoc = m.fileUrl && !m.fileType?.startsWith("image");
+
+                                    return (
+                                        <div className={`flex ${isMe ? "justify-end" : "justify-start"} `}>
+                                            <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                                                <div className={`relative px-4 py-3 shadow-2xl ${isMe ? "bg-emerald-600 text-white rounded-[22px] rounded-br-none" : "bg-[#141923] text-slate-200 rounded-[22px] rounded-bl-none border border-white/5"}`}>
+
+                                                    {
+                                                        isImage
+                                                        &&
+                                                        <div className='mb-2 relative group overflow-hidden rounded-xl'>
+                                                            <img
+                                                                src={m.fileUrl}
+                                                                alt=""
+                                                                className='max-w-fit rounded-xl cursor-zoom-in hover:scale-105 transition-all'
+                                                                onClick={() => window.open(m.fileUrl, "_blank")}
+                                                            />
+                                                        </div>
+                                                    }
+
+                                                    {
+
+                                                        isDoc
+
+                                                        &&
+
+                                                        <div className='flex items-center gap-3 p-3 bg-black/20 rounded-xl mb-2 border border-white/5 group '>
+                                                            <div className='p-2 bg-emerald-500/10 text-emerald-400 rounded-lg'>
+                                                                <FileText size={20} />
+                                                            </div>
+                                                            <div className='flex-1 min-w-0 '>
+                                                                <p className='text-xs font-bold truncate'>
+                                                                    {m.fileName || "Document"}
+                                                                </p>
+                                                            </div>
+
+                                                            <a
+                                                                href={m.fileUrl} download
+                                                                className='p-1.5 text-slate-400 hover:text-white transition-all '>
+                                                                <DownloadIcon size={16} />
+                                                            </a>
+                                                        </div>
+
+                                                    }
+
+
+                                                    {
+                                                        m.text &&
+                                                        <p className={`text-[13px] leading-relaxed font-medium`}>
+                                                            {m.text}
+                                                        </p>
+                                                    }
+
+                                                    {/* Date  */}
+
+                                                    <div className={`mt-1.5 text-[9px] font-bold ${isMe ? "text-emerald-200/60" : "text-slate-500"}`}>
+                                                        {formatDate(m.createAt)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+
+                        }
+
+                        <div ref={scrollRef} />
 
                     </div>
+
+
 
                     {/* input  */}
 
                     <div className='p-6 bg-gradient-to-t from-[#080a0f] to-transparent  '>
                         <div className='max-w-4xl mx-auto flex items-center gap-3 bg-[#0f141e] rounded-[24px] p-2 border border-white/10 shadow-2xl focus-within:border-emerald-500/40 transition-all '>
-                            <input type="file" className='hidden' />
+                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className='hidden' />
                             <button className='p-3 text-slate-500 hover:text-emerald-400 transition-all'>
                                 <Paperclip size={20} />
                             </button>
