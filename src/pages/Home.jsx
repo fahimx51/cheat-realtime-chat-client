@@ -35,12 +35,21 @@ export default function Home() {
     }
 
     // Filtered users for search sidebar
+    // Filtered users for search sidebar
     const filteredUsers = useMemo(() => {
-        if (!user) return [];
-        return users.filter((u) =>
-            u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.email?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        if (!user || !users) return [];
+
+        return users.filter((u) => {
+            // 1. Check if the user is NOT me
+            const isNotMe = u._id !== user._id;
+
+            // 2. Check if the user matches the search query
+            const matchesSearch =
+                u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                u.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+            return isNotMe && matchesSearch;
+        });
     }, [users, searchQuery, user]);
 
     // Fetch initial user list

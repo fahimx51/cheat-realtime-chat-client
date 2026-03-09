@@ -1,15 +1,23 @@
 import { ArrowLeft, Camera, Save, User } from 'lucide-react'
 import React from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Profile() {
+
+    const navigate = useNavigate();
+
     return (
         <div className="min-h-screen bg-[#0b0e14] text-slate-300 font-sans p-6">
             <div className="max-w-2xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
-                    <button className="p-2 hover:bg-white/5 rounded-xl transition text-slate-400">
-                        <ArrowLeft />
-                    </button>
+
+                    <Link to='/'>
+                        <button className="p-2 hover:bg-white/5 rounded-xl transition text-slate-400">
+                            <ArrowLeft />
+                        </button>
+
+                    </Link>
 
                     <h1 className="text-xs font-black uppercase tracking-widest">
                         Profile Setting
