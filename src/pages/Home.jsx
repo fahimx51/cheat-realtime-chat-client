@@ -373,17 +373,30 @@ export default function Home() {
 
                     <div className='p-6 bg-gradient-to-t from-[#080a0f] to-transparent  '>
                         <div className='max-w-4xl mx-auto flex items-center gap-3 bg-[#0f141e] rounded-[24px] p-2 border border-white/10 shadow-2xl focus-within:border-emerald-500/40 transition-all '>
-                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className='hidden' />
-                            <button className='p-3 text-slate-500 hover:text-emerald-400 transition-all'>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className='hidden'
+                            />
+
+                            <button className='p-3 text-slate-500 hover:text-emerald-400 transition-all' onClick={() => fileInputRef.current.click()}>
                                 <Paperclip size={20} />
                             </button>
 
-                            <input type="text"
-                                placeholder='Type a message...'
+                            <input
+                                type="text"
+                                value={input}
+                                placeholder={uploading ? 'Uploading a file...' : 'Type a message...'}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                                 className='flex-1 bg-transparent text-[13px] py-2 px-2 outline-none text-slate-100 placeholder:text-slate-600  '
                             />
 
-                            <button className='bg-emerald-500 text-black p-3.5 rounded-full hover:bg-emerald-400 active:scale-90 transition-all disabled:opacity-30 shadow-lg shadow-emerald-500/30 '>
+                            <button
+                                className='bg-emerald-500 text-black p-3.5 rounded-full hover:bg-emerald-400 active:scale-90 transition-all disabled:opacity-30 shadow-lg shadow-emerald-500/30 '
+                                onClick={handleSend} disabled={!input.trim() && !uploading}
+                            >
                                 <Send size={18} />
                             </button>
 
