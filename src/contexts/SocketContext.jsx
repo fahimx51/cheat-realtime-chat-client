@@ -1,32 +1,47 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import socket, { connectSocket } from "../services/socket";
+import { io } from "socket.io-client";
 
 export const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
     const { user, token } = useContext(AuthContext);
-    const [isConnected, setConnected] = useState(socket);
+    const [socket, setSocket] = useState(null);
     const [onlineUser, setOnlineUser] = useState([]);
-
+    // ADD THIS LINE - This was the cause of the red error
+    const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
         if (user && token) {
-            connectSocket(user, token);
+            const newSocket = io("http://localhost:3000", {
+                query: { token, userId: user._id },
+                auth: { token },
+                transports: ["websocket"]
+            });
+
+            newSocket.on("connect", () => {
+                console.log("✅ Socket Connected:", newSocket.id);
+                setIsConnected(true);
+            });
+
+            // Make sure "getOnlineUser" matches exactly what is in your backend emit
+            newSocket.on("getOnlineUser", (users) => {
+                setOnlineUser(users);
+            });
+
+            newSocket.on("disconnect", () => {
+                console.log("❌ Socket Disconnected");
+                setIsConnected(false);
+            });
+
+            setSocket(newSocket);
+
+            return () => {
+                newSocket.close();
+                setSocket(null);
+            };
         }
-
-        socket.on('connect', () => setConnected(true));
-        socket.on('disconnect', () => setConnected(false));
-        socket.on('getOnlineUser', (user) => setOnlineUser(user));
-
-        return () => {
-            socket.off("getOnlineUser");
-            socket.off("connect");
-            socket.off("disconnect");
-        };
-
     }, [user, token]);
-
 
     return (
         <SocketContext.Provider value={{ socket, onlineUser, isConnected }}>
